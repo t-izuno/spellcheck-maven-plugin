@@ -15,7 +15,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Core spell checker implementation using LanguageTool.
@@ -28,6 +30,7 @@ public class SpellChecker {
     private final SpellCheckConfiguration config;
     private final Log log;
     private final JLanguageTool languageTool;
+    private final Set<String> ignoreWords;
 
     /**
      * Creates a new spell checker with the given configuration.
@@ -40,15 +43,18 @@ public class SpellChecker {
         this.config = config;
         this.log = log;
         this.languageTool = createLanguageTool(config.getLanguage());
+        this.ignoreWords = new HashSet<>();
 
         // Add custom words to ignore
         if (config.getCustomDictionary() != null && config.getCustomDictionary().exists()) {
             loadCustomDictionary(config.getCustomDictionary());
         }
 
-        // Add ignore words
-        for (String word : config.getIgnoreWords()) {
-            languageTool.addIgnoreTokens(java.util.Collections.singletonList(word));
+        // Add ignore words from configuration
+        if (config.getIgnoreWords() != null) {
+            for (String word : config.getIgnoreWords()) {
+                ignoreWords.add(word.toLowerCase());
+            }
         }
     }
 
@@ -84,7 +90,7 @@ public class SpellChecker {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (!line.isEmpty() && !line.startsWith("#")) {
-                    languageTool.addIgnoreTokens(java.util.Collections.singletonList(line));
+                    ignoreWords.add(line.toLowerCase());
                 }
             }
         }
@@ -133,11 +139,18 @@ public class SpellChecker {
             for (RuleMatch match : matches) {
                 // Only report spelling errors, not grammar errors
                 if (isSpellingError(match)) {
+                    String word = content.substring(match.getFromPos(), match.getToPos());
+
+                    // Skip words that are in the ignore list
+                    if (ignoreWords.contains(word.toLowerCase())) {
+                        continue;
+                    }
+
                     SpellError error = new SpellError(
                         file,
                         match.getLine() + 1,
                         match.getColumn() + 1,
-                        content.substring(match.getFromPos(), match.getToPos()),
+                        word,
                         match.getMessage(),
                         match.getSuggestedReplacements()
                     );
