@@ -33,14 +33,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean compile --file pom.xml
 
-    - name: Run tests
-      run: mvn -B test --file pom.xml
-
     - name: Run integration tests
       run: mvn -B verify --file pom.xml
-
-    - name: Package
-      run: mvn -B package -DskipTests --file pom.xml
 
     - name: Upload build artifacts
       if: matrix.java == '11'
