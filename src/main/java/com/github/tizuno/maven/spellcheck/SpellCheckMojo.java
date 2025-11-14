@@ -1,5 +1,7 @@
 package com.github.tizuno.maven.spellcheck;
 
+import com.github.tizuno.maven.spellcheck.config.CSpellConfig;
+import com.github.tizuno.maven.spellcheck.config.CSpellConfigLoader;
 import com.github.tizuno.maven.spellcheck.config.SpellCheckConfiguration;
 import com.github.tizuno.maven.spellcheck.report.SpellCheckReport;
 import org.apache.maven.plugin.AbstractMojo;
@@ -102,6 +104,20 @@ public class SpellCheckMojo extends AbstractMojo {
     @Parameter(property = "spellcheck.generateReport", defaultValue = "true")
     private boolean generateReport;
 
+    /**
+     * Path to CSpell configuration file (cspell.json or .cspell.json).
+     * If not specified, the plugin will search for the configuration file
+     * in the project base directory.
+     */
+    @Parameter(property = "spellcheck.cspellConfig")
+    private File cspellConfigFile;
+
+    /**
+     * Enable automatic detection and loading of CSpell configuration files.
+     */
+    @Parameter(property = "spellcheck.useCSpellConfig", defaultValue = "true")
+    private boolean useCSpellConfig;
+
     private SpellChecker spellChecker;
 
     @Override
@@ -159,13 +175,73 @@ public class SpellCheckMojo extends AbstractMojo {
     /**
      * Creates the spell check configuration from plugin parameters.
      */
-    private SpellCheckConfiguration createConfiguration() {
+    private SpellCheckConfiguration createConfiguration() throws IOException {
         SpellCheckConfiguration config = new SpellCheckConfiguration();
-        config.setLanguage(language);
-        config.setEncoding(encoding != null ? encoding : "UTF-8");
-        config.setCustomDictionary(customDictionary);
-        config.setIgnoreWords(ignoreWords != null ? ignoreWords : new ArrayList<>());
+
+        // Try to load CSpell configuration if enabled
+        CSpellConfig cspellConfig = null;
+        if (useCSpellConfig) {
+            cspellConfig = loadCSpellConfig();
+        }
+
+        // If CSpell config was loaded, use it as base configuration
+        if (cspellConfig != null) {
+            CSpellConfigLoader loader = new CSpellConfigLoader(getLog());
+            config = loader.toSpellCheckConfiguration(cspellConfig);
+            getLog().info("Using CSpell configuration file");
+        }
+
+        // Override with explicit Maven plugin parameters (they take precedence)
+        if (language != null) {
+            config.setLanguage(language);
+        }
+        if (encoding != null) {
+            config.setEncoding(encoding);
+        }
+        if (customDictionary != null) {
+            config.setCustomDictionary(customDictionary);
+        }
+        if (ignoreWords != null && !ignoreWords.isEmpty()) {
+            // Merge with existing ignore words from CSpell config
+            List<String> mergedIgnoreWords = new ArrayList<>(config.getIgnoreWords());
+            mergedIgnoreWords.addAll(ignoreWords);
+            config.setIgnoreWords(mergedIgnoreWords);
+        }
+
+        // Ensure encoding is set
+        if (config.getEncoding() == null || config.getEncoding().isEmpty()) {
+            config.setEncoding("UTF-8");
+        }
+
         return config;
+    }
+
+    /**
+     * Loads CSpell configuration from file.
+     *
+     * @return the CSpell configuration, or null if not found
+     */
+    private CSpellConfig loadCSpellConfig() {
+        try {
+            CSpellConfigLoader loader = new CSpellConfigLoader(getLog());
+
+            // If specific config file is specified
+            if (cspellConfigFile != null) {
+                if (cspellConfigFile.exists()) {
+                    return loader.loadConfig(cspellConfigFile);
+                } else {
+                    getLog().warn("Specified CSpell config file not found: " + cspellConfigFile.getAbsolutePath());
+                    return null;
+                }
+            }
+
+            // Otherwise, search in project base directory
+            return loader.loadConfig(project.getBasedir());
+        } catch (IOException e) {
+            getLog().warn("Failed to load CSpell configuration: " + e.getMessage());
+            getLog().debug("CSpell configuration load error", e);
+            return null;
+        }
     }
 
     /**
