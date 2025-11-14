@@ -113,8 +113,14 @@ You can configure the plugin in your `pom.xml`:
         <!-- Skip spell check -->
         <skip>false</skip>
 
-        <!-- Generate report -->
+        <!-- Generate text report -->
         <generateReport>true</generateReport>
+
+        <!-- Generate JUnit XML report for CI/CD integration -->
+        <generateJUnitReport>false</generateJUnitReport>
+
+        <!-- Generate Checkstyle XML report for CI/CD integration -->
+        <generateCheckstyleReport>false</generateCheckstyleReport>
     </configuration>
 </plugin>
 ```
@@ -149,6 +155,19 @@ Disable CSpell config file detection:
 
 ```bash
 mvn spellcheck:check -Dspellcheck.useCSpellConfig=false
+```
+
+Generate CI/CD-friendly reports:
+
+```bash
+# Generate JUnit XML report
+mvn spellcheck:check -Dspellcheck.generateJUnitReport=true
+
+# Generate Checkstyle XML report
+mvn spellcheck:check -Dspellcheck.generateCheckstyleReport=true
+
+# Generate both CI reports
+mvn spellcheck:check -Dspellcheck.generateJUnitReport=true -Dspellcheck.generateCheckstyleReport=true
 ```
 
 ## CSpell Integration
@@ -202,8 +221,136 @@ The plugin supports CSpell's `import` feature to load configuration from other f
 
 ## Reports
 
-The plugin generates a spell check report in the `target/spellcheck` directory:
-- `spellcheck-report.txt`: Text report with all spelling errors
+The plugin generates spell check reports in the `target/spellcheck` directory:
+
+### Text Report (Default)
+- `spellcheck-report.txt`: Human-readable text report with all spelling errors
+- Enabled by default with `generateReport=true`
+
+### CI/CD Integration Reports
+
+#### JUnit XML Report
+- **File**: `spellcheck-junit.xml`
+- **Enable**: Set `generateJUnitReport=true`
+- **Format**: JUnit XML format compatible with most CI/CD tools
+- **Supported by**:
+  - Jenkins (JUnit plugin)
+  - GitLab CI/CD
+  - GitHub Actions
+  - Azure DevOps
+  - CircleCI
+  - Travis CI
+  - And many other CI/CD platforms
+
+**Example configuration for Jenkins**:
+```xml
+<plugin>
+    <groupId>com.github.tizuno</groupId>
+    <artifactId>spellcheck-maven-plugin</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <configuration>
+        <generateJUnitReport>true</generateJUnitReport>
+        <failOnError>false</failOnError> <!-- Let CI handle failures -->
+    </configuration>
+</plugin>
+```
+
+In your Jenkinsfile:
+```groovy
+stage('Spell Check') {
+    steps {
+        sh 'mvn spellcheck:check'
+    }
+    post {
+        always {
+            junit 'target/spellcheck/spellcheck-junit.xml'
+        }
+    }
+}
+```
+
+#### Checkstyle XML Report
+- **File**: `spellcheck-checkstyle.xml`
+- **Enable**: Set `generateCheckstyleReport=true`
+- **Format**: Checkstyle XML format for code quality tools
+- **Supported by**:
+  - Jenkins Warnings Next Generation plugin
+  - SonarQube
+  - Code quality dashboards
+  - IDE integrations
+
+**Example configuration for Jenkins Warnings NG**:
+```xml
+<plugin>
+    <groupId>com.github.tizuno</groupId>
+    <artifactId>spellcheck-maven-plugin</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <configuration>
+        <generateCheckstyleReport>true</generateCheckstyleReport>
+        <failOnError>false</failOnError>
+    </configuration>
+</plugin>
+```
+
+In your Jenkinsfile:
+```groovy
+stage('Spell Check') {
+    steps {
+        sh 'mvn spellcheck:check'
+    }
+    post {
+        always {
+            recordIssues(
+                enabledForFailure: true,
+                tools: [checkStyle(pattern: 'target/spellcheck/spellcheck-checkstyle.xml', reportEncoding: 'UTF-8')]
+            )
+        }
+    }
+}
+```
+
+### GitHub Actions Example
+
+```yaml
+name: Spell Check
+
+on: [push, pull_request]
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Run Spell Check
+        run: mvn spellcheck:check -Dspellcheck.generateJUnitReport=true
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: 'target/spellcheck/spellcheck-junit.xml'
+          check_name: 'Spell Check Results'
+```
+
+### GitLab CI Example
+
+```yaml
+spell-check:
+  stage: test
+  script:
+    - mvn spellcheck:check -Dspellcheck.generateJUnitReport=true
+  artifacts:
+    when: always
+    reports:
+      junit: target/spellcheck/spellcheck-junit.xml
+```
 
 ## Requirements
 

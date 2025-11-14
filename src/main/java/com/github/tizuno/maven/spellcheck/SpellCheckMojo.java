@@ -3,6 +3,8 @@ package com.github.tizuno.maven.spellcheck;
 import com.github.tizuno.maven.spellcheck.config.CSpellConfig;
 import com.github.tizuno.maven.spellcheck.config.CSpellConfigLoader;
 import com.github.tizuno.maven.spellcheck.config.SpellCheckConfiguration;
+import com.github.tizuno.maven.spellcheck.report.CheckstyleXmlReportGenerator;
+import com.github.tizuno.maven.spellcheck.report.JUnitXmlReportGenerator;
 import com.github.tizuno.maven.spellcheck.report.SpellCheckReport;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -105,6 +107,20 @@ public class SpellCheckMojo extends AbstractMojo {
     private boolean generateReport;
 
     /**
+     * Generate JUnit XML report for CI/CD integration.
+     * This format is supported by Jenkins, GitLab CI, GitHub Actions, and many other CI tools.
+     */
+    @Parameter(property = "spellcheck.generateJUnitReport", defaultValue = "false")
+    private boolean generateJUnitReport;
+
+    /**
+     * Generate Checkstyle XML report for CI/CD integration.
+     * This format is supported by Jenkins Warnings Next Generation plugin, SonarQube, and other tools.
+     */
+    @Parameter(property = "spellcheck.generateCheckstyleReport", defaultValue = "false")
+    private boolean generateCheckstyleReport;
+
+    /**
      * Path to CSpell configuration file (cspell.json or .cspell.json).
      * If not specified, the plugin will search for the configuration file
      * in the project base directory.
@@ -151,9 +167,15 @@ public class SpellCheckMojo extends AbstractMojo {
             // Perform spell checking
             SpellCheckReport report = spellChecker.check(filesToCheck);
 
-            // Generate report if requested
+            // Generate reports if requested
             if (generateReport) {
-                generateReport(report);
+                generateTextReport(report);
+            }
+            if (generateJUnitReport) {
+                generateJUnitXmlReport(report);
+            }
+            if (generateCheckstyleReport) {
+                generateCheckstyleXmlReport(report);
             }
 
             // Log summary
@@ -305,17 +327,50 @@ public class SpellCheckMojo extends AbstractMojo {
     }
 
     /**
-     * Generates the spell check report.
+     * Generates the text format spell check report.
      */
-    private void generateReport(SpellCheckReport report) throws IOException {
-        if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs();
-        }
+    private void generateTextReport(SpellCheckReport report) throws IOException {
+        ensureOutputDirectory();
 
         File reportFile = new File(outputDirectory, "spellcheck-report.txt");
         report.writeToFile(reportFile);
 
-        getLog().info("Report generated at: " + reportFile.getAbsolutePath());
+        getLog().info("Text report generated at: " + reportFile.getAbsolutePath());
+    }
+
+    /**
+     * Generates the JUnit XML format spell check report.
+     */
+    private void generateJUnitXmlReport(SpellCheckReport report) throws IOException {
+        ensureOutputDirectory();
+
+        File reportFile = new File(outputDirectory, "spellcheck-junit.xml");
+        JUnitXmlReportGenerator generator = new JUnitXmlReportGenerator();
+        generator.generateReport(report, reportFile);
+
+        getLog().info("JUnit XML report generated at: " + reportFile.getAbsolutePath());
+    }
+
+    /**
+     * Generates the Checkstyle XML format spell check report.
+     */
+    private void generateCheckstyleXmlReport(SpellCheckReport report) throws IOException {
+        ensureOutputDirectory();
+
+        File reportFile = new File(outputDirectory, "spellcheck-checkstyle.xml");
+        CheckstyleXmlReportGenerator generator = new CheckstyleXmlReportGenerator();
+        generator.generateReport(report, reportFile);
+
+        getLog().info("Checkstyle XML report generated at: " + reportFile.getAbsolutePath());
+    }
+
+    /**
+     * Ensures the output directory exists.
+     */
+    private void ensureOutputDirectory() {
+        if (!outputDirectory.exists()) {
+            outputDirectory.mkdirs();
+        }
     }
 
     /**
