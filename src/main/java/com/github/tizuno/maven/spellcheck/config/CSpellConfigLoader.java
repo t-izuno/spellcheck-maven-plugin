@@ -42,37 +42,40 @@ public class CSpellConfigLoader {
     }
 
     /**
-     * Finds and loads a CSpell configuration file from the given directory.
+     * Loads a CSpell configuration from a file or directory.
+     * If the file is a directory, searches for a configuration file within it.
+     * If the file is a regular file, loads it directly as a configuration file.
      *
-     * @param baseDirectory the directory to search for configuration files
+     * @param fileOrDirectory the configuration file or directory to search
      * @return the loaded configuration, or null if no configuration file found
      * @throws IOException if an error occurs reading the configuration file
      */
-    public CSpellConfig loadConfig(File baseDirectory) throws IOException {
-        File configFile = findConfigFile(baseDirectory);
+    public CSpellConfig loadConfig(File fileOrDirectory) throws IOException {
+        if (fileOrDirectory == null || !fileOrDirectory.exists()) {
+            if (fileOrDirectory == null) {
+                throw new IOException("Configuration file is null");
+            }
+            throw new IOException("Configuration file does not exist: " + fileOrDirectory.getAbsolutePath());
+        }
 
-        if (configFile == null) {
-            log.debug("No CSpell configuration file found in: " + baseDirectory.getAbsolutePath());
-            return null;
+        File configFile;
+        File baseDirectory;
+
+        if (fileOrDirectory.isDirectory()) {
+            // Search for configuration file in the directory
+            configFile = findConfigFile(fileOrDirectory);
+            if (configFile == null) {
+                log.debug("No CSpell configuration file found in: " + fileOrDirectory.getAbsolutePath());
+                return null;
+            }
+            baseDirectory = fileOrDirectory;
+        } else {
+            // Use the file directly as configuration file
+            configFile = fileOrDirectory;
+            baseDirectory = fileOrDirectory.getParentFile();
         }
 
         log.info("Loading CSpell configuration from: " + configFile.getAbsolutePath());
-        return loadConfigFile(configFile, baseDirectory);
-    }
-
-    /**
-     * Loads a specific CSpell configuration file.
-     *
-     * @param configFile the configuration file to load
-     * @return the loaded configuration
-     * @throws IOException if an error occurs reading the configuration file
-     */
-    public CSpellConfig loadConfig(File configFile) throws IOException {
-        if (configFile == null || !configFile.exists()) {
-            throw new IOException("Configuration file does not exist: " + configFile);
-        }
-
-        File baseDirectory = configFile.getParentFile();
         return loadConfigFile(configFile, baseDirectory);
     }
 
