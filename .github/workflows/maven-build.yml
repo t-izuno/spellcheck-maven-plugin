@@ -35,7 +35,6 @@ jobs:
 
     - name: Run integration tests
       run: mvn -B verify --file pom.xml
-
     - name: Upload build artifacts
       if: matrix.java == '11'
       uses: actions/upload-artifact@v4
