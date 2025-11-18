@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck.report;
+package io.nncdevel.maven.spellcheck.report;
 
 import java.io.File;
 import java.util.List;

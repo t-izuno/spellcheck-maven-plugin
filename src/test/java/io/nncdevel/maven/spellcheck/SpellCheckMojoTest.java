@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck;
+package io.nncdevel.maven.spellcheck;
 
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.WithoutMojo;

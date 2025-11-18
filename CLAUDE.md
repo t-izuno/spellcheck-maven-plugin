@@ -70,7 +70,7 @@ spellcheck-maven-plugin/
 ├── src/
 │   ├── main/
 │   │   ├── java/                   # Java source code
-│   │   │   └── com/yourorg/maven/spellcheck/
+│   │   │   └── io/nncdevel/maven/spellcheck/
 │   │   │       ├── SpellCheckMojo.java          # Main Mojo class
 │   │   │       ├── SpellChecker.java            # Core spell-check logic
 │   │   │       ├── config/                      # Configuration classes
@@ -84,7 +84,7 @@ spellcheck-maven-plugin/
 │   │               └── plugin.xml               # Plugin descriptor (if not using annotations)
 │   └── test/
 │       ├── java/                   # Test source code
-│       │   └── com/yourorg/maven/spellcheck/
+│       │   └── io/nncdevel/maven/spellcheck/
 │       │       ├── SpellCheckMojoTest.java
 │       │       └── integration/                 # Integration tests
 │       └── resources/
@@ -151,7 +151,7 @@ mvn clean install
 
 # Use in a test project
 cd /path/to/test-project
-mvn com.yourorg:spellcheck-maven-plugin:1.0-SNAPSHOT:check
+mvn io.nncdevel.maven:spellcheck-maven-plugin:1.0-SNAPSHOT:check
 ```
 
 ---
@@ -258,7 +258,7 @@ public class SpellCheckMojo extends AbstractMojo {
 - **Classes**: PascalCase (e.g., `SpellCheckMojo`, `DictionaryManager`)
 - **Methods**: camelCase (e.g., `checkSpelling()`, `loadDictionary()`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `DEFAULT_ENCODING`)
-- **Packages**: lowercase (e.g., `com.yourorg.maven.spellcheck`)
+- **Packages**: lowercase (e.g., `io.nncdevel.maven.spellcheck`)
 
 ### Documentation
 
@@ -338,7 +338,7 @@ Use Maven Invoker Plugin for integration tests:
 ```
 src/test/
 ├── java/
-│   └── com/yourorg/maven/spellcheck/
+│   └── io/nncdevel/maven/spellcheck/
 │       ├── SpellCheckMojoTest.java
 │       ├── DictionaryManagerTest.java
 │       └── integration/

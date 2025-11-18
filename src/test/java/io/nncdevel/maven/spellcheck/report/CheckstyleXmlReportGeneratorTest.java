@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck.report;
+package io.nncdevel.maven.spellcheck.report;
 
 import org.junit.After;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck.config;
+package io.nncdevel.maven.spellcheck.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.logging.Log;

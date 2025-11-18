@@ -1,11 +1,11 @@
-package com.github.tizuno.maven.spellcheck;
+package io.nncdevel.maven.spellcheck;
 
-import com.github.tizuno.maven.spellcheck.config.CSpellConfig;
-import com.github.tizuno.maven.spellcheck.config.CSpellConfigLoader;
-import com.github.tizuno.maven.spellcheck.config.SpellCheckConfiguration;
-import com.github.tizuno.maven.spellcheck.report.CheckstyleXmlReportGenerator;
-import com.github.tizuno.maven.spellcheck.report.JUnitXmlReportGenerator;
-import com.github.tizuno.maven.spellcheck.report.SpellCheckReport;
+import io.nncdevel.maven.spellcheck.config.CSpellConfig;
+import io.nncdevel.maven.spellcheck.config.CSpellConfigLoader;
+import io.nncdevel.maven.spellcheck.config.SpellCheckConfiguration;
+import io.nncdevel.maven.spellcheck.report.CheckstyleXmlReportGenerator;
+import io.nncdevel.maven.spellcheck.report.JUnitXmlReportGenerator;
+import io.nncdevel.maven.spellcheck.report.SpellCheckReport;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

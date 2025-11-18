@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck.config;
+package io.nncdevel.maven.spellcheck.config;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;

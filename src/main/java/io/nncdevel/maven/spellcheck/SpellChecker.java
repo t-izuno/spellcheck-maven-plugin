@@ -1,8 +1,8 @@
-package com.github.tizuno.maven.spellcheck;
+package io.nncdevel.maven.spellcheck;
 
-import com.github.tizuno.maven.spellcheck.config.SpellCheckConfiguration;
-import com.github.tizuno.maven.spellcheck.report.SpellCheckReport;
-import com.github.tizuno.maven.spellcheck.report.SpellError;
+import io.nncdevel.maven.spellcheck.config.SpellCheckConfiguration;
+import io.nncdevel.maven.spellcheck.report.SpellCheckReport;
+import io.nncdevel.maven.spellcheck.report.SpellError;
 import org.apache.maven.plugin.logging.Log;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.AmericanEnglish;
