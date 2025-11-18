@@ -1,4 +1,4 @@
-package com.github.tizuno.maven.spellcheck.config;
+package io.nncdevel.maven.spellcheck.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

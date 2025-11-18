@@ -21,7 +21,7 @@ Add the plugin to your `pom.xml`:
 <build>
     <plugins>
         <plugin>
-            <groupId>com.github.tizuno</groupId>
+            <groupId>io.nncdevel.maven</groupId>
             <artifactId>spellcheck-maven-plugin</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <executions>
@@ -82,7 +82,7 @@ You can configure the plugin in your `pom.xml`:
 
 ```xml
 <plugin>
-    <groupId>com.github.tizuno</groupId>
+    <groupId>io.nncdevel.maven</groupId>
     <artifactId>spellcheck-maven-plugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <configuration>
@@ -245,7 +245,7 @@ The plugin generates spell check reports in the `target/spellcheck` directory:
 **Example configuration for Jenkins**:
 ```xml
 <plugin>
-    <groupId>com.github.tizuno</groupId>
+    <groupId>io.nncdevel.maven</groupId>
     <artifactId>spellcheck-maven-plugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <configuration>
@@ -282,7 +282,7 @@ stage('Spell Check') {
 **Example configuration for Jenkins Warnings NG**:
 ```xml
 <plugin>
-    <groupId>com.github.tizuno</groupId>
+    <groupId>io.nncdevel.maven</groupId>
     <artifactId>spellcheck-maven-plugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <configuration>
